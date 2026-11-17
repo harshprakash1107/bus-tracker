@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Bus Tracker</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+</head>
+<body style="margin:0">
+<div id="map" style="height:100vh"></div>
+
+<script>
+// ====== CHANGE THIS ======
+const DB = "https://harsh-s-project-a5bd1-default-rtdb.firebaseio.com/buses/bus1.json";
+// =========================
+
+const map = L.map('map').setView([24.79, 85.0], 13);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+const marker = L.marker([24.79, 85.0]).addTo(map);
+let first = true;
+
+async function update() {
+  try {
+    const d = await (await fetch(DB)).json();
+    if (!d) return;
+    marker.setLatLng([d.lat, d.lng])
+          .bindPopup("Speed: " + d.speed + " km/h<br>Updated " +
+                     Math.round((Date.now() - d.ts) / 1000) + " s ago");
+    if (first) { map.setView([d.lat, d.lng], 16); first = false; }
+  } catch (e) {
+    console.log("Error:", e);
+  }
+}
+
+setInterval(update, 5000);
+update();
+</script>
+</body>
+</html>
